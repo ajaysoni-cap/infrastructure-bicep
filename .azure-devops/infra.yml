@@ -4,29 +4,70 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- task: AzureResourceManagerTemplateDeployment@3
-  displayName: 'Validate Template'
-  inputs:
-    deploymentScope: 'Resource Group'
-    azureResourceManagerConnection: 'MSDN Subcription'
-    subscriptionId: '967d4b58-56c6-4522-80bb-36142c2a0217'
-    action: 'Create Or Update Resource Group'
-    resourceGroupName: 'DEVAKSRG01'
-    location: 'UK South'
-    csmFile: '$(Pipeline.Workspace)/s/templates/aks/cluster.bicep'
-    csmParametersFile: '$(Pipeline.Workspace)/s/templates/aks/cluster.bicepparam'
-    deploymentMode: 'Validation'
+stages:
+  - stage: Build
+    jobs:
+      - job: Validate
+        steps:
+          - task: AzureResourceManagerTemplateDeployment@3
+            displayName: 'Validate Template'
+            inputs:
+              deploymentScope: 'Resource Group'
+              azureResourceManagerConnection: 'MSDN Subcription'
+              subscriptionId: '967d4b58-56c6-4522-80bb-36142c2a0217'
+              action: 'Create Or Update Resource Group'
+              resourceGroupName: 'DEVAKSRG01'
+              location: 'UK South'
+              csmFile: '$(Pipeline.Workspace)/s/templates/aks/cluster.bicep'
+              csmParametersFile: '$(Pipeline.Workspace)/s/templates/aks/cluster.bicepparam'
+              deploymentMode: 'Validation'
 
-- task: AzureResourceManagerTemplateDeployment@3
-  displayName: 'Deploy Template'
-  inputs:
-    deploymentScope: 'Resource Group'
-    azureResourceManagerConnection: 'MSDN Subcription'
-    subscriptionId: '967d4b58-56c6-4522-80bb-36142c2a0217'
-    action: 'Create Or Update Resource Group'
-    resourceGroupName: 'DEVAKSRG01'
-    location: 'UK South'
-    csmFile: '$(Pipeline.Workspace)/s/templates/aks/cluster.bicep'
-    csmParametersFile: '$(Pipeline.Workspace)/s/templates/aks/cluster.bicepparam'
-    deploymentMode: 'Incremental'
+  - stage: Deploy
+    dependsOn: Build
+    jobs:
+      - deployment: DEV
+        environment: DEV
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureResourceManagerTemplateDeployment@3
+                  displayName: 'Deploy Template'
+                  inputs:
+                    deploymentScope: 'Resource Group'
+                    azureResourceManagerConnection: 'MSDN Subcription'
+                    subscriptionId: '967d4b58-56c6-4522-80bb-36142c2a0217'
+                    action: 'Create Or Update Resource Group'
+                    resourceGroupName: 'DEVAKSRG01'
+                    location: 'UK South'
+                    csmFile: '$(Pipeline.Workspace)/s/templates/aks/cluster.bicep'
+                    csmParametersFile: '$(Pipeline.Workspace)/s/templates/aks/cluster.bicepparam'
+                    deploymentMode: 'Incremental'
+
+  - stage: Cleanup
+    dependsOn: Build
+    condition: succeeded('Deploy')
+    jobs:
+      - job: ConfirmDelete
+        displayName: 'Proceed to Deletion'
+        pool: server
+        timeoutInMinutes: 43200
+        steps:
+        - task: ManualValidation@0
+          displayName: Approval for slot swap
+          timeoutInMinutes: 43200
+          inputs:
+            notifyUsers: |
+              ajay.b.soni@capgemini.com
+            instructions: 'Please validate the build configuration and resume'
+            onTimeout: 'reject'
+
+      - job: Delete
+        steps:
+          - task: AzureCLI@2
+            displayName: Delete all resources
+            inputs:
+              azureSubscription: 'MSDN Subcription'
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: 'az group delete --name "DEVAKSRG01"'
