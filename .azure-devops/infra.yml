@@ -46,7 +46,7 @@ stages:
                     deploymentMode: 'Incremental'
 
   - stage: Cleanup
-    dependsOn: Build
+    dependsOn: Deploy
     condition: succeeded('Deploy')
     jobs:
       - job: ConfirmDelete
