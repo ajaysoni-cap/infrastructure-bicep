@@ -64,6 +64,7 @@ stages:
             onTimeout: 'reject'
 
       - job: Delete
+        dependsOn: ConfirmDelete
         steps:
           - task: AzureCLI@2
             displayName: Delete all resources
