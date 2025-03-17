@@ -16,11 +16,13 @@ module cluster 'br/public:avm/res/container-service/managed-cluster:0.8.3' = {
     skuName: 'Base'
     skuTier: 'Free'
     location: location
-    identityProfile: {
-      kubeletidentity: {
-        resourceId: identity.outputs.resourceId
-      }
-    }
+    // identityProfile: {
+    //   kubeletidentity: {
+    //     resourceId: identity.outputs.resourceId
+    //   }
+    // }
+    enableWorkloadIdentity: true
+    enableOidcIssuerProfile: true
     primaryAgentPoolProfiles: [
       {
         name: 'pool1'
