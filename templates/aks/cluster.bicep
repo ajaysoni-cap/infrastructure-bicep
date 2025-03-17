@@ -19,8 +19,6 @@ module cluster 'br/public:avm/res/container-service/managed-cluster:0.8.3' = {
     identityProfile: {
       kubeletidentity: {
         resourceId: identity.outputs.resourceId
-        clientId: identity.outputs.clientId
-        objectId: identity.outputs.principalId
       }
     }
     primaryAgentPoolProfiles: [
