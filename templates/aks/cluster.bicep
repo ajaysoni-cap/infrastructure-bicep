@@ -1,26 +1,13 @@
 param clusterName string = 'cluster-101'
 param location string = resourceGroup().location
 
-module identity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = {
-  name: 'cluster-102-agentpool'
-  params: {
-    name: 'cluster-102-agentpool'
-    location: location
-  }
-}
-
 module cluster 'br/public:avm/res/container-service/managed-cluster:0.8.3' = {
-  name: clusterName
+  name: '${deployment().name}-${clusterName}'
   params: {
     name: clusterName
     skuName: 'Base'
     skuTier: 'Free'
     location: location
-    // identityProfile: {
-    //   kubeletidentity: {
-    //     resourceId: identity.outputs.resourceId
-    //   }
-    // }
     enableWorkloadIdentity: true
     enableOidcIssuerProfile: true
     primaryAgentPoolProfiles: [
@@ -99,65 +86,9 @@ module cluster 'br/public:avm/res/container-service/managed-cluster:0.8.3' = {
         }
       }
     ]
+    enableStorageProfileDiskCSIDriver: true
+    enableStorageProfileFileCSIDriver: true
+    enableStorageProfileSnapshotController: true
+    nodeProvisioningProfileMode: 'Manual'
   }
 }
-
-// resource managedClusters_cluster_101_name_resource 'Microsoft.ContainerService/managedClusters@2024-09-02-preview' = {
-//   properties: {
-//     windowsProfile: {
-//       adminUsername: 'azureuser'
-//       enableCSIProxy: true
-//     }
-//     servicePrincipalProfile: {
-//       clientId: 'msi'
-//     }
-//     identityProfile: {
-//       kubeletidentity: {
-//         resourceId: userAssignedIdentities_cluster_101_agentpool_externalid
-//         clientId: '1f8d75e6-7fe2-4b33-b6ce-df47cb5daffc'
-//         objectId: 'c44a6ba6-26ce-495c-a479-177d3655d0af'
-//       }
-//     }
-//     autoUpgradeProfile: {
-//       upgradeChannel: 'patch'
-//       nodeOSUpgradeChannel: 'NodeImage'
-//     }
-//     disableLocalAccounts: true
-//     securityProfile: {
-//       imageCleaner: {
-//         enabled: false
-//         intervalHours: 168
-//       }
-//       workloadIdentity: {
-//         enabled: true
-//       }
-//     }
-//     storageProfile: {
-//       diskCSIDriver: {
-//         enabled: true
-//         version: 'v1'
-//       }
-//       fileCSIDriver: {
-//         enabled: true
-//       }
-//       snapshotController: {
-//         enabled: true
-//       }
-//     }
-//     oidcIssuerProfile: {
-//       enabled: true
-//     }
-//     workloadAutoScalerProfile: {}
-//     metricsProfile: {
-//       costAnalysis: {
-//         enabled: false
-//       }
-//     }
-//     nodeProvisioningProfile: {
-//       mode: 'Manual'
-//     }
-//     bootstrapProfile: {
-//       artifactSource: 'Direct'
-//     }
-//   }
-// }
