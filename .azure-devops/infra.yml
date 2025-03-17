@@ -71,4 +71,4 @@ stages:
               azureSubscription: 'MSDN Subcription'
               scriptType: 'pscore'
               scriptLocation: 'inlineScript'
-              inlineScript: 'az group delete --name "DEVAKSRG01"'
+              inlineScript: 'az group delete --name "DEVAKSRG01" --yes'
