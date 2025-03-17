@@ -17,3 +17,16 @@ steps:
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
+
+- task: AzureResourceManagerTemplateDeployment@3
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: 'MSDN Subcription'
+    subscriptionId: '967d4b58-56c6-4522-80bb-36142c2a0217'
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: 'AKS'
+    location: 'UK South'
+    templateLocation: 'Linked artifact'
+    csmFile: 'templates\aks\cluster.bicep'
+    csmParametersFile: 'templates\aks\cluster.bicepparam'
+    deploymentMode: 'Validation'
