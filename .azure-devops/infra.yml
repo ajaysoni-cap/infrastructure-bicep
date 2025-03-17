@@ -22,10 +22,10 @@ stages:
               csmParametersFile: '$(Pipeline.Workspace)/s/templates/aks/cluster.bicepparam'
               deploymentMode: 'Validation'
 
-  - stage: Deploy
+  - stage: DEV
     dependsOn: Build
     jobs:
-      - deployment: DEV
+      - deployment: Deploy
         environment: DEV
         strategy:
           runOnce:
@@ -46,8 +46,8 @@ stages:
                     deploymentMode: 'Incremental'
 
   - stage: Cleanup
-    dependsOn: Deploy
-    condition: succeeded('Deploy')
+    dependsOn: DEV
+    condition: succeeded('DEV')
     jobs:
       - job: ConfirmDelete
         displayName: 'Proceed to Deletion'
