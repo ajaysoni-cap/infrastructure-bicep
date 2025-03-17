@@ -26,6 +26,6 @@ steps:
     action: 'Create Or Update Resource Group'
     resourceGroupName: 'AKS'
     location: 'UK South'
-    csmFile: '/templates/aks/cluster.bicep'
-    csmParametersFile: '/templates/aks/cluster.bicepparam'
+    csmFile: '$(Pipeline.Workspace)/s/templates/aks/cluster.bicep'
+    csmParametersFile: '$(Pipeline.Workspace)/s/templates/aks/cluster.bicepparam'
     deploymentMode: 'Validation'
