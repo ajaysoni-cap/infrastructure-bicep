@@ -31,6 +31,7 @@ stages:
           runOnce:
             deploy:
               steps:
+                - checkout: self
                 - task: AzureResourceManagerTemplateDeployment@3
                   displayName: 'Deploy Template'
                   inputs:
